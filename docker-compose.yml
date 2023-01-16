@@ -37,7 +37,11 @@ services:
       - "/config/policy.rego"
     security_opt:
       - label:disable
+  #app:
+  #  ports:
+  #    - "3000:80"
+  #  image: kennethreitz/httpbin:latest
   app:
+    image: nest-sample-app
     ports:
-      - "3000:80"
-    image: kennethreitz/httpbin:latest
+      - "3000:3000"

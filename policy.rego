@@ -35,13 +35,21 @@ jwks := jwks_request(jwks_endpoint).raw_body
 verified := io.jwt.verify_rs256(bearer_token, jwks)
 
 allow = response {
-  print("verified", verified, "jwks", jwks)
-  trace(jwks_endpoint)
+  #print("verified", verified, "jwks", jwks)
+  #trace(jwks_endpoint)
   verified == true
   http_request.method == "GET"
   http_request.headers["x-allowed"] == "True"
   response := {
       "allowed": true,
       "headers": {"X-Auth-User": "1234"}
+  }
+}
+
+allow = response {
+  glob.match("/sayhi", ["/"], http_request.path)
+  response := {
+    "allowed": true,
+    "headers": {"X-Auth-User": "1234"}
   }
 }

@@ -52,7 +52,7 @@ static_resources:
             address:
               socket_address:
                 address: app
-                port_value: 80
+                port_value: 3000
                 
 admin:
   access_log_path: "/dev/null"
