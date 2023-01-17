@@ -1,7 +1,7 @@
 package envoy.authz
-
+import future.keywords
 import input.attributes.request.http as http_request
-default allow = false
+default allow := false
 
 
 metadata_discovery(issuer) = http.send({
@@ -17,7 +17,7 @@ bearer_token := t {
     t := substring(v, count("Bearer "), -1)
 }
 
-#payload := io.jwt.decode(bearer_token)[1]
+payload := io.jwt.decode(bearer_token)[1]
 #metadata := metadata_discovery(payload.iss)
 
 jwks_endpoint := "http://oidc:8080/realms/master/protocol/openid-connect/certs"
@@ -32,24 +32,18 @@ jwks_request(url) = http.send({
 
 jwks := jwks_request(jwks_endpoint).raw_body
 
+allow if {
+  action_allowed
+  verified
+}
+
+action_allowed if {
+  glob.match("/sayhi", ["/"], http_request.path)
+}
+
+
 verified := io.jwt.verify_rs256(bearer_token, jwks)
 
-allow = response {
-  #print("verified", verified, "jwks", jwks)
-  #trace(jwks_endpoint)
-  verified == true
-  http_request.method == "GET"
-  http_request.headers["x-allowed"] == "True"
-  response := {
-      "allowed": true,
-      "headers": {"X-Auth-User": "1234"}
-  }
-}
-
-allow = response {
-  glob.match("/sayhi", ["/"], http_request.path)
-  response := {
-    "allowed": true,
-    "headers": {"X-Auth-User": "1234"}
-  }
-}
+response_headers_to_add["x-foo"] := "bar"
+result["response_headers_to_add"] := response_headers_to_add
+result["allowed"] := allow

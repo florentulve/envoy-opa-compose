@@ -4,6 +4,8 @@ RUN dnf module enable -y nodejs:18 && dnf install -y --setopt=install_weak_deps=
 
 WORKDIR /usr/share/app
 
-COPY ./ .
+COPY ./app .
+
+EXPOSE 3000
 
 ENTRYPOINT ["node", "dist/main"]

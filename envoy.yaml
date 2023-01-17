@@ -33,16 +33,16 @@ static_resources:
                 failure_mode_allow: false
                 grpc_service:
                   google_grpc:
-                    target_uri: opa:9191
+                    target_uri: 172.16.238.4:9191
                     stat_prefix: ext_authz
-                  timeout: 0.5s
+                  timeout: 2.0s
             - name: envoy.filters.http.router
               typed_config:
                 "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
   clusters:
   - name: service
     connect_timeout: 0.25s
-    type: strict_dns
+    type: static
     lb_policy: round_robin
     load_assignment:
       cluster_name: service
@@ -51,7 +51,7 @@ static_resources:
         - endpoint:
             address:
               socket_address:
-                address: app
+                address: 172.16.238.10
                 port_value: 3000
                 
 admin:
