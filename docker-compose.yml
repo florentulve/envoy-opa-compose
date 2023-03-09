@@ -54,8 +54,8 @@ services:
       - label:disable
   app:
     build: 
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./app/
+      dockerfile: ../Dockerfile
     ports:
       - "3000:3000"
     networks:

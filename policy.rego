@@ -20,7 +20,7 @@ bearer_token := t {
 payload := io.jwt.decode(bearer_token)[1]
 #metadata := metadata_discovery(payload.iss)
 
-jwks_endpoint := "http://oidc:8080/realms/master/protocol/openid-connect/certs"
+jwks_endpoint := "http://172.16.238.2:8080/realms/master/protocol/openid-connect/certs"
 #token_endpoint := metadata.token_endpoint
 
 jwks_request(url) = http.send({

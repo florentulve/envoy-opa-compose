@@ -1,24 +1,48 @@
 # Using Envoy external authorization with Open Policy Agent
 
-This project demonstrates how to use Envoy's external authorization filter with Open Policy Agent as the authorization
-service to enforce security policies for all API requests received by Envoy.
+Boot
 
-Based on [this OPA tutorial](https://www.openpolicyagent.org/docs/latest/envoy-authorization/) using docker-compose
-instead of Kubernetes.
+```sh
+docker-compose up
+```
 
-This is meant for dockerized services (in a non-k8s environment) to easily leverage OPA for authorization.
+Get token
 
-*Disclaimer: This example project was initially created when there was lack of documentation on how to use the
-`ext_authz` filter with OPA. Specifically there was a lack of sample code to run using docker-compose. There has
-since been updated documentation and sample code in the [official
-docs](https://www.envoyproxy.io/docs/envoy/latest/start/sandboxes/ext_authz). Do check that out instead!*
+```
+set token (curl -sS --location --request POST 'http://127.0.0.1:8080/realms/master/protocol/openid-connect/token' \
+      --header 'Content-Type: application/x-www-form-urlencoded' \
+      --data-urlencode 'password=admin' \
+      --data-urlencode 'username=admin' \
+      --data-urlencode 'client_id=admin-cli' \
+      --data-urlencode 'grant_type=password' | jq -r .access_token)
+```
 
-## Usage
+```sh
+curl --head -H "Authorization: Bearer $token" -X GET http://localhost:5000/sayho
+```
 
-Run `docker-compose up` to start services.
+```sh
+HTTP/1.1 403 Forbidden
+date: Thu, 09 Mar 2023 19:44:30 GMT
+server: envoy
+content-length: 0
+```
 
-A toy `policy.rego` file is used to only permit GET requests, i.e. `curl -X GET http://localhost:8080/anything` should
-work but `curl -X POST http://localhost:8080/anything` should fail.
+```sh
+curl --head -H "Authorization: Bearer $token" -X GET http://localhost:5000/sayhi
+```
 
-Environment variables `SERVICE_NAME` and `SERVICE_PORT` refers to the service Envoy is proxying. These env variables
-will replace the variables in `envoy.yaml`. See `./compose/envoy/entrypoint.sh` for more details.
+```sh
+HTTP/1.1 403 Forbidden
+date: Thu, 09 Mar 2023 19:44:30 GMT
+server: envoy
+content-length: 0
+```
+
+```sh
+HTTP/1.1 503 Service Unavailable
+content-length: 91
+content-type: text/plain
+date: Thu, 09 Mar 2023 19:45:19 GMT
+server: envoy
+```
